@@ -1,0 +1,5 @@
+{
+  "name": "SkillSpot 2.0",
+  "description": "A multi-organization scalable platform to transform SkillSpot into a centralized skill ecosystem. It hosts multiple NGOs/training centers, each managing their own skill programs and student communities under a unified, tenant-based architecture.",
+  "requestFramePermissions": []
+}
