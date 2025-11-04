@@ -76,29 +76,4 @@ export const NGOS: NGO[] = [
       },
     ],
   },
-  {
-    id: 'ngo-3',
-    name: 'Green Future Initiative',
-    description: 'Dedicated to environmental education and sustainable practices. Our programs aim to create a greener planet through community action and awareness.',
-    location: 'Portland, OR',
-    type: 'Environmental',
-    contact: {
-      email: 'hello@greenfuture.org',
-      phone: '345-678-9012',
-      website: 'https://greenfuture.org'
-    },
-    courses: [
-      {
-        id: 'course-3-1',
-        name: 'Urban Gardening and Composting',
-        description: 'Learn how to grow your own food and reduce waste in an urban environment. A hands-on course for all skill levels.',
-        category: 'Sustainability',
-        duration: '4 Weeks',
-        trainer: 'Maria Garcia',
-        seatsAvailable: 15,
-        startDate: '2025-07-01',
-        reviews: [],
-      },
-    ],
-  },
 ];
