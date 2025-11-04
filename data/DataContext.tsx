@@ -46,23 +46,37 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (enrollmentsRes.error) throw enrollmentsRes.error;
         if (notificationsRes.error) throw notificationsRes.error;
 
-        if (ngosRes.data.length === 0) {
+        // Safely handle seeding logic, checking for data existence first.
+        if (ngosRes.data && ngosRes.data.length === 0) {
             console.log("No NGOs found, seeding database...");
             const { error: seedError } = await supabase.from('ngos').insert(initialNgos);
             if (seedError) throw seedError;
             const { data: seededNgos } = await supabase.from('ngos').select('*');
             setNgos(seededNgos || []);
         } else {
-            setNgos(ngosRes.data);
+            // Ensure we always set an array, even if data is null.
+            setNgos(ngosRes.data || []);
         }
 
-        setUsers(usersRes.data);
-        setEnrollments(enrollmentsRes.data);
-        setNotifications(notificationsRes.data);
+        // Ensure all other states are also set with arrays, preventing crashes.
+        setUsers(usersRes.data || []);
+        setEnrollments(enrollmentsRes.data || []);
+        setNotifications(notificationsRes.data || []);
 
     } catch (err: any) {
-        const errorMessage = `Error fetching data from Supabase. This is likely due to an issue with your database schema or Row Level Security policies.\nDetailed Error:\n${err.message || err}`;
-        console.error(errorMessage);
+        let errorMessage = `Error fetching data from Supabase. This is likely due to an issue with your database schema or Row Level Security policies.\nDetailed Error:\n${err.message || err}`;
+        
+        if (err?.message?.includes('violates row-level security policy')) {
+             errorMessage = `Database Security Error: The application cannot read data from your database.
+
+This typically means you have enabled Row Level Security (RLS) on your tables (e.g., 'ngos', 'users') but have not created policies to allow read ('SELECT') access for anonymous or authenticated users.
+
+To fix this, please go to your Supabase project's SQL Editor and ensure you have 'SELECT' policies for all tables. For example, to make NGOs public, run:
+
+CREATE POLICY "Allow public read access to NGOs" ON public.ngos FOR SELECT USING (true);`;
+        }
+        
+        console.error(err.message || err);
         setError(errorMessage);
     } finally {
         setLoading(false);

@@ -42,7 +42,6 @@ export interface User {
   name: string;
   email: string;
   phone?: string;
-  password?: string;
   role: 'admin' | 'student';
   ngoId?: string;
 }
@@ -58,6 +57,8 @@ export interface Enrollment {
   ngoId: string;
   status: EnrollmentStatus;
   requestDate: string;
+  previousExperience?: string;
+  reasonForJoining?: string;
 }
 
 export interface Notification {

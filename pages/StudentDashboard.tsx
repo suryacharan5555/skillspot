@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useData } from '../data/DataContext';
 import { Enrollment, NGO, Course, EnrollmentStatus, Review } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 
 const StarIcon: React.FC<{ filled: boolean, onClick?: () => void, onMouseEnter?: () => void, onMouseLeave?: () => void, sizeClass?: string }> = 
@@ -102,13 +102,36 @@ const getStatusPill = (status: EnrollmentStatus) => {
 
 const StudentDashboard: React.FC = () => {
     const { user } = useAuth();
-    const { enrollments, ngos, fetchNgos } = useData();
+    const { enrollments, ngos, fetchNgos, loading, error } = useData();
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviewingCourse, setReviewingCourse] = useState<{ course: Course, ngo: NGO } | null>(null);
 
-    if (!user) {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [successMessage, setSuccessMessage] = useState(location.state?.successMessage || '');
+
+    useEffect(() => {
+        if (successMessage) {
+            const timer = setTimeout(() => {
+                setSuccessMessage('');
+                navigate(location.pathname, { replace: true, state: {} }); 
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [successMessage, navigate, location.pathname]);
+
+    if (loading) {
         return <p>Loading student data...</p>;
     }
+
+    if (error) {
+        return <p className="text-red-500">Error: {error}</p>;
+    }
+    
+    if (!user) {
+        return <p>Redirecting to login...</p>;
+    }
+
 
     const studentEnrollments = enrollments.filter(e => e.studentId === user.id);
 
@@ -160,6 +183,13 @@ const StudentDashboard: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {successMessage && (
+                <div className="bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 text-green-800 dark:text-green-200 p-4 rounded-r-lg shadow" role="alert">
+                    <p className="font-bold">Success</p>
+                    <p>{successMessage}</p>
+                </div>
+            )}
+            
             <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Welcome, {user.name}!</h1>
 
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { useData } from '../data/DataContext';
 import { User } from '../types';
 import { supabase } from '../lib/supabaseClient';
 
@@ -11,16 +10,30 @@ const GoogleIcon = () => (
     </svg>
 );
 
+const CheckEmailIcon = () => (
+    <svg className="mx-auto h-16 w-16 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+);
+
 const ForgotPasswordModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleResetRequest = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, you would use Supabase's built-in password reset functionality.
-        // supabase.auth.resetPasswordForEmail(email)
-        // For this demo, we'll just show a confirmation.
-        setMessage('If an account with that email exists, a password reset link has been sent.');
+        setIsLoading(true);
+        setMessage('');
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+             redirectTo: window.location.href.split('#')[0],
+        });
+        setIsLoading(false);
+        if (error) {
+            setMessage(`Error: ${error.message}`);
+        } else {
+            setMessage('If an account with that email exists, a password reset link has been sent.');
+        }
     };
     
     return (
@@ -45,7 +58,9 @@ const ForgotPasswordModal: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                         />
                         <div className="flex justify-end space-x-3">
                             <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Cancel</button>
-                            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg">Send Reset Link</button>
+                            <button type="submit" disabled={isLoading} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-blue-400">
+                                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                            </button>
                         </div>
                     </form>
                 )}
@@ -60,18 +75,34 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isRegister, setIsRegister] = useState(false);
+  const [registrationNeedsConfirmation, setRegistrationNeedsConfirmation] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
 
   const navigate = useNavigate();
-  const { login, isAuthenticated, user } = useAuth();
-  const { fetchUsers } = useData();
+  const { isAuthenticated, user } = useAuth();
   
-  // Redirect if user is already logged in
+  const RLS_ERROR_MESSAGE = 
+`Database Security Error: Your database's security rules are blocking new user registrations.
+
+This is a common setup issue. To fix this, you must add a policy that allows new users to create their own profile.
+
+Please go to your Supabase project's SQL Editor and run the following command:
+
+CREATE POLICY "Allow users to insert their own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);`;
+
+  
   useEffect(() => {
+    const authError = sessionStorage.getItem('authError');
+    if (authError === 'rls_user_insert_policy_missing') {
+        setError(RLS_ERROR_MESSAGE);
+        sessionStorage.removeItem('authError');
+    }
+
     if (isAuthenticated) {
       if (user?.role === 'admin') {
         navigate('/admin-dashboard', { replace: true });
@@ -89,24 +120,17 @@ const LoginPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
+
     try {
-        const { data: user, error: queryError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('email', email)
-            .eq('password', password) // In a real app, you'd send the password to a server-side function to compare hashes.
-            .single();
-
-        if (queryError || !user) {
-            setError('Invalid email or password.');
-            return;
-        }
-
-        login(user);
-        // Redirect is now handled by the useEffect hook
-    } catch (err) {
-        setError('An unexpected error occurred.');
+        const { error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+        if (error) throw error;
+    } catch (err: any) {
+        setError(err.message || 'An unexpected error occurred.');
     } finally {
         setIsLoading(false);
     }
@@ -115,11 +139,8 @@ const LoginPage: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
-    if (!name || !email || !password) {
-        setError('All fields are required for registration.');
-        return;
-    }
     if (password !== confirmPassword) {
         setError('Passwords do not match.');
         return;
@@ -127,30 +148,51 @@ const LoginPage: React.FC = () => {
 
     setIsLoading(true);
     try {
-        // Check if user already exists
-        const { data: existingUser } = await supabase.from('users').select('id').eq('email', email).single();
-        if (existingUser) {
-            setError('A user with this email already exists.');
-            return;
-        }
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
 
-        const newUser: Omit<User, 'id'> = {
+        if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error("Sign up successful, but no user data returned.");
+
+        const newUserProfile: Omit<User, 'id'> & { id: string } = {
+            id: authData.user.id,
             name,
             email,
             phone,
-            password, // IMPORTANT: Never store plain text passwords. Use Supabase Auth or hash on a server.
-            role: 'student',
+            role: 'student' as const,
         };
         
-        const { data: createdUser, error: insertError } = await supabase.from('users').insert(newUser).select().single();
-
+        const { error: insertError } = await supabase.from('users').insert(newUserProfile);
         if (insertError) throw insertError;
+        
+        if (authData.session === null) {
+          setRegistrationNeedsConfirmation(true);
+        } else {
+          setSuccessMessage('Registration successful! Please sign in to continue.');
+          setIsRegister(false);
+          setPassword('');
+          setConfirmPassword('');
+          setName('');
+          setPhone('');
+        }
 
-        await fetchUsers();
-        login(createdUser);
-        // Redirect is now handled by the useEffect hook
     } catch (err: any) {
-        setError(err.message || 'Failed to register.');
+        let errorMessage = 'An unexpected error occurred during registration.';
+        if (err instanceof Error) errorMessage = err.message;
+        else if (err && typeof err === 'object' && 'message' in err) {
+            const msg = (err as { message: unknown }).message;
+            if (typeof msg === 'string') errorMessage = msg;
+        } else if (typeof err === 'string') errorMessage = err;
+
+        if (errorMessage.toLowerCase().includes('violates row-level security policy for table "users"')) {
+            setError(RLS_ERROR_MESSAGE);
+        } else if (errorMessage.toLowerCase().includes('email signups are disabled')) {
+            setError("Registration failed: Email signups are currently disabled. Please contact an administrator.");
+        } else {
+            setError(`Registration failed: ${errorMessage}`);
+        }
     } finally {
         setIsLoading(false);
     }
@@ -159,20 +201,44 @@ const LoginPage: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setError('');
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-    });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
 
     if (error) {
         setError(error.message);
         setIsLoading(false);
     }
-    // On success, Supabase redirects to Google, then back to the app.
-    // The onAuthStateChange listener in AuthContext will handle the session.
-    // The useEffect in this component will handle the final redirect to the dashboard.
   };
 
   const handleSubmit = isRegister ? handleRegister : handleLogin;
+  
+  if (registrationNeedsConfirmation) {
+    return (
+        <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-10 rounded-xl shadow-lg text-center">
+                <CheckEmailIcon />
+                <h2 className="mt-6 text-2xl font-extrabold text-gray-900 dark:text-white">
+                    Please confirm your email
+                </h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    We've sent a confirmation link to <strong>{email}</strong>. Please check your inbox (and spam folder) to activate your account.
+                </p>
+                <div className="mt-6">
+                    <button 
+                        onClick={() => {
+                            setRegistrationNeedsConfirmation(false);
+                            setIsRegister(false);
+                            setEmail('');
+                            setPassword('');
+                        }}
+                        className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                        Back to Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <>
@@ -184,11 +250,14 @@ const LoginPage: React.FC = () => {
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
               Or{' '}
-              <button onClick={() => { setIsRegister(!isRegister); setError(''); }} className="font-medium text-blue-600 hover:text-blue-500">
+              <button onClick={() => { setIsRegister(!isRegister); setError(''); setSuccessMessage(''); }} className="font-medium text-blue-600 hover:text-blue-500">
                 {isRegister ? 'sign in to an existing account' : 'start your journey today'}
               </button>
             </p>
           </div>
+
+          {successMessage && <p className="text-sm text-center text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">{successMessage}</p>}
+
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               {isRegister && (
@@ -197,7 +266,7 @@ const LoginPage: React.FC = () => {
                     <input id="name" name="name" type="text" required className={combinedInputClasses} placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
                   </div>
                   <div>
-                    <input id="phone" name="phone" type="tel" autoComplete="tel" className={combinedInputClasses} placeholder="Phone Number (Optional)" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                    <input id="phone" name="phone" type="tel" autoComplete="tel" required className={combinedInputClasses} placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)} />
                   </div>
                 </>
               )}
@@ -224,8 +293,12 @@ const LoginPage: React.FC = () => {
                 </div>
             )}
 
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
-
+            {error && (
+                <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg mt-4">
+                    <p className="whitespace-pre-wrap text-left font-mono text-xs">{error}</p>
+                </div>
+            )}
+            
             <div>
               <button type="submit" disabled={isLoading} className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400">
                 {isLoading ? 'Processing...' : (isRegister ? 'Register' : 'Sign in')}

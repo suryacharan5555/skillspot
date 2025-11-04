@@ -30,8 +30,8 @@ const Header: React.FC = () => {
 
   const unreadCount = useMemo(() => userNotifications.filter(n => !n.isRead).length, [userNotifications]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
@@ -70,7 +70,7 @@ const Header: React.FC = () => {
                         {unreadCount > 0 && <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>}
                     </button>
                     {isNotificationsOpen && (
-                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 overflow-hidden">
+                        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border dark:border-gray-700 overflow-hidden z-[60]">
                             <div className="p-3 flex justify-between items-center border-b dark:border-gray-700">
                                 <h4 className="font-semibold text-gray-800 dark:text-white">Notifications</h4>
                                 {unreadCount > 0 && <button onClick={handleMarkAllAsRead} className="text-xs text-blue-500 hover:underline">Mark all as read</button>}

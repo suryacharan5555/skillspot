@@ -19,6 +19,9 @@ const CourseEditorModal: React.FC<CourseEditorModalProps> = ({ isOpen, onClose, 
     startDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
   });
   const [error, setError] = useState('');
+  
+  const inputClasses = "w-full px-4 py-2 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400";
+
 
   useEffect(() => {
     if (course) {
@@ -74,17 +77,17 @@ const CourseEditorModal: React.FC<CourseEditorModalProps> = ({ isOpen, onClose, 
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">&times;</button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-            <input type="text" name="name" placeholder="Course Name" value={formData.name} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
-            <textarea name="description" placeholder="Course Description" value={formData.description} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" rows={3}></textarea>
+            <input type="text" name="name" placeholder="Course Name" value={formData.name} onChange={handleChange} required className={inputClasses} />
+            <textarea name="description" placeholder="Course Description" value={formData.description} onChange={handleChange} required className={inputClasses} rows={3}></textarea>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" name="category" placeholder="Category (e.g., Technology)" value={formData.category} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
-                <input type="text" name="duration" placeholder="Duration (e.g., 8 Weeks)" value={formData.duration} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
-                <input type="text" name="trainer" placeholder="Trainer Name" value={formData.trainer} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
-                <input type="number" name="seatsAvailable" placeholder="Seats Available" value={formData.seatsAvailable} onChange={handleChange} required min="0" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
+                <input type="text" name="category" placeholder="Category (e.g., Technology)" value={formData.category} onChange={handleChange} required className={inputClasses} />
+                <input type="text" name="duration" placeholder="Duration (e.g., 8 Weeks)" value={formData.duration} onChange={handleChange} required className={inputClasses} />
+                <input type="text" name="trainer" placeholder="Trainer Name" value={formData.trainer} onChange={handleChange} required className={inputClasses} />
+                <input type="number" name="seatsAvailable" placeholder="Seats Available" value={formData.seatsAvailable} onChange={handleChange} required min="0" className={inputClasses} />
             </div>
             <div>
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                <input type="date" id="startDate" name="startDate" value={formData.startDate} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700" />
+                <input type="date" id="startDate" name="startDate" value={formData.startDate} onChange={handleChange} required className={inputClasses} />
             </div>
             
             {error && <p className="text-sm text-red-500 text-center">{error}</p>}

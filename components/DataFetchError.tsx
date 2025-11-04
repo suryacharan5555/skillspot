@@ -15,16 +15,7 @@ const DataFetchError: React.FC<{ error: string }> = ({ error }) => {
                 </div>
                 <div className="ml-4">
                     <p className="font-bold text-lg">Database Configuration Error</p>
-                    <p className="mt-2 text-sm">
-                        The application failed to connect to the database. This usually means the database tables are not set up correctly.
-                    </p>
-                    <div className="mt-4 p-3 bg-red-100 dark:bg-gray-800 rounded-md">
-                        <p className="text-sm font-semibold text-red-800 dark:text-red-200">Specific Error:</p>
-                        <code className="text-xs text-red-900 dark:text-red-200 break-all">{error}</code>
-                    </div>
-                    <p className="mt-4 text-sm">
-                        Please go to your Supabase SQL Editor and run the complete, correct SQL script to create all the necessary tables.
-                    </p>
+                    <p className="mt-2 text-sm whitespace-pre-wrap">{error}</p>
                 </div>
             </div>
         </div>
