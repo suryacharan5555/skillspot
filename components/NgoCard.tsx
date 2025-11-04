@@ -13,13 +13,19 @@ const LocationIcon = () => (
 );
 
 const NgoCard: React.FC<NgoCardProps> = ({ ngo }) => {
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
+  
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-all duration-300 flex flex-col">
-      <img className="h-40 w-full object-cover" src={ngo.bannerUrl} alt={`${ngo.name} banner`} />
+      <div className="h-28 w-full bg-gradient-to-r from-blue-500 to-indigo-600" />
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex items-center mb-4">
-          <img className="h-16 w-16 rounded-full object-cover ring-4 ring-white dark:ring-gray-800 -mt-12" src={ngo.logoUrl} alt={`${ngo.name} logo`} />
-          <div className="ml-4">
+          <div className="h-16 w-16 rounded-full bg-indigo-200 dark:bg-indigo-900 flex items-center justify-center ring-4 ring-white dark:ring-gray-800 -mt-10">
+              <span className="text-2xl font-bold text-indigo-700 dark:text-indigo-200">{getInitials(ngo.name)}</span>
+          </div>
+          <div className="ml-4 mt-2">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">{ngo.name}</h3>
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-1">
                 <LocationIcon />

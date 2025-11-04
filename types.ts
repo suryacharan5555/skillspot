@@ -1,48 +1,70 @@
+// Fix: Create types.ts to define all shared types.
 
-export type EnrollmentStatus = 'Pending' | 'Approved' | 'Rejected';
+export interface Review {
+  id: string;
+  studentId: string;
+  studentName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
 
 export interface Course {
   id: string;
   name: string;
   description: string;
+  category: string;
   duration: string;
   trainer: string;
   seatsAvailable: number;
-  category: string;
+  startDate: string; // New field for course start date
+  reviews: Review[];
+}
+
+export interface Contact {
+  email: string;
+  phone: string;
+  website: string;
 }
 
 export interface NGO {
   id: string;
   name: string;
-  logoUrl: string;
-  bannerUrl: string;
-  location: string;
-  category: string;
-  type: string;
   description: string;
-  missionStatement: string;
-  contact: {
-    person: string;
-    email: string;
-    website: string;
-  };
+  location: string;
+  type: 'Community Development' | 'Education' | 'Environmental' | 'Healthcare';
   courses: Course[];
+  contact?: Contact;
 }
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  password?: string; // Should be optional or not present on client after login
+  phone?: string;
+  password?: string;
   role: 'admin' | 'student';
-  ngoId?: string; // For admins
+  ngoId?: string;
 }
 
+export type EnrollmentStatus = 'Pending' | 'Approved' | 'Rejected';
+
 export interface Enrollment {
-    enrollmentId: string;
-    studentId: string;
-    courseId: string;
-    ngoId: string;
-    status: EnrollmentStatus;
-    enrolledAt: string; // ISO date string
+  enrollmentId: string;
+  studentId: string;
+  studentName: string;
+  courseId: string;
+  courseName: string;
+  ngoId: string;
+  status: EnrollmentStatus;
+  requestDate: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  message: string;
+  link: string;
+  isRead: boolean;
+  createdAt: string;
 }

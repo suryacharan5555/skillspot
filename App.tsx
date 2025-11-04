@@ -9,6 +9,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { ThemeProvider } from './theme/ThemeContext';
+import { DataProvider } from './data/DataContext';
 
 const PrivateRoute: React.FC<{ children: ReactElement, role: 'admin' | 'student' }> = ({ children, role }) => {
     const { isAuthenticated, user } = useAuth();
@@ -58,9 +60,13 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <HashRouter>
-        <AppContent />
-      </HashRouter>
+      <ThemeProvider>
+        <DataProvider>
+          <HashRouter>
+            <AppContent />
+          </HashRouter>
+        </DataProvider>
+      </ThemeProvider>
     </AuthProvider>
   );
 };

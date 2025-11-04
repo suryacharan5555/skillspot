@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
+// Fix: Correct import for GoogleGenAI.
+import { GoogleGenAI } from "@google/genai";
 import { NGOS } from '../constants';
 
 interface ChatMessage {
@@ -31,28 +32,39 @@ const simplifiedNgos = NGOS.map(ngo => ({
 
 const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        { sender: 'ai', text: "Hello! I'm your SkillSpot assistant. How can I help you find the perfect course today?" }
-    ]);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [userInput, setUserInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
     
-    const aiClientRef = useRef<any>(null);
+    const aiClientRef = useRef<GoogleGenAI | null>(null);
     const initAttempted = useRef(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        const apiKey = process.env.API_KEY;
+        if (!apiKey) {
+            setIsApiKeyMissing(true);
+            setMessages([{ sender: 'ai', text: "Hello! The AI Assistant is currently offline due to a missing API key." }]);
+        } else {
+            setIsApiKeyMissing(false);
+            setMessages([{ sender: 'ai', text: "Hello! I'm your SkillSpot assistant. How can I help you find the perfect course today?" }]);
+        }
+    }, []);
+
     const initializeChatbot = () => {
-        if (initAttempted.current || aiClientRef.current) return;
+        if (initAttempted.current || aiClientRef.current || isApiKeyMissing) return;
         initAttempted.current = true;
 
         const apiKey = process.env.API_KEY;
+        // This check is redundant due to the useEffect, but good for safety
         if (!apiKey) {
             console.error("Gemini API Key is missing.");
-            setMessages(prev => [...prev, { sender: 'ai', text: "Configuration error: The AI assistant cannot be initialized." }]);
             return;
         }
 
         try {
+            // Fix: Correct initialization of GoogleGenAI client.
             aiClientRef.current = new GoogleGenAI({ apiKey });
         } catch (e) {
             console.error("Failed to initialize GoogleGenAI client", e);
@@ -78,7 +90,7 @@ const Chatbot: React.FC = () => {
     }, [messages, isLoading, isOpen]);
     
     const handleSend = async () => {
-        if (!userInput.trim() || isLoading) return;
+        if (!userInput.trim() || isLoading || isApiKeyMissing) return;
 
         if (!aiClientRef.current) {
             setMessages(prev => [...prev, { sender: 'ai', text: "Sorry, the AI assistant is not ready. Please try again in a moment." }]);
@@ -93,26 +105,22 @@ const Chatbot: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const isFirstUserMessage = newMessages.filter(m => m.sender === 'user').length === 1;
-
             const conversationHistory = newMessages
-                .filter(msg => msg.text !== "Hello! I'm your SkillSpot assistant. How can I help you find the perfect course today?")
-                .map(msg => {
-                    let text = msg.text;
-                    if (msg.sender === 'user' && isFirstUserMessage) {
-                        const systemInstruction = `You are a friendly and helpful AI assistant for SkillSpot 2.0. Your goal is to help users find suitable skill development courses from various NGOs. You should be encouraging and provide clear, concise information. Based on the user's query and the NGO data provided, recommend the most relevant options. Provide the NGO name and course name in your recommendation. If a course is full (seatsAvailable: 0), mention that the user can join a waitlist. If the user asks a general question, answer it politely. Do not make up information not present in the provided context.`;
-                        const dataContext = `Here is the data for the available NGOs and courses on SkillSpot 2.0:\n${JSON.stringify(simplifiedNgos, null, 2)}`;
-                        text = `${systemInstruction}\n\n${dataContext}\n\nMy question is: "${msg.text}"`;
-                    }
-                    return {
-                        role: msg.sender === 'user' ? 'user' : 'model',
-                        parts: [{ text: text }],
-                    };
-                });
+                .filter(msg => !msg.text.includes("offline due to a missing API key")) // Exclude initial error message
+                .map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.text }],
+                }));
 
+            const systemInstruction = `You are a friendly and helpful AI assistant for SkillSpot 2.0. Your goal is to help users find suitable skill development courses from various NGOs. You should be encouraging and provide clear, concise information. Based on the user's query and the NGO data provided, recommend the most relevant options. Provide the NGO name and course name in your recommendation. If a course is full (seatsAvailable: 0), mention that the user can join a waitlist. If the user asks a general question, answer it politely. Do not make up information not present in the provided context. Here is the data for the available NGOs and courses on SkillSpot 2.0:\n${JSON.stringify(simplifiedNgos, null, 2)}`;
+
+            // Fix: Use systemInstruction and send the full conversation history.
             const response = await aiClientRef.current.models.generateContent({
                 model: 'gemini-2.5-flash',
                 contents: conversationHistory,
+                config: {
+                    systemInstruction: systemInstruction,
+                },
             });
 
             const aiResponse = response.text;
@@ -179,11 +187,11 @@ const Chatbot: React.FC = () => {
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            placeholder="Ask about courses..."
-                            className="w-full px-4 py-2 border rounded-full focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                            disabled={isLoading}
+                            placeholder={isApiKeyMissing ? "Assistant is offline" : "Ask about courses..."}
+                            className="w-full px-4 py-2 border rounded-full bg-white text-gray-900 border-gray-300 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
+                            disabled={isLoading || isApiKeyMissing}
                         />
-                        <button onClick={handleSend} disabled={isLoading || !userInput.trim()} className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-500 transition-colors">
+                        <button onClick={handleSend} disabled={isLoading || isApiKeyMissing || !userInput.trim()} className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-500 transition-colors">
                             <SendIcon />
                         </button>
                     </div>
