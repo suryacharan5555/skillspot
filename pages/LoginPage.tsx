@@ -201,7 +201,12 @@ CREATE POLICY "Allow users to insert their own profile" ON public.users FOR INSE
   const handleGoogleSignIn = async () => {
     setError('');
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      }
+    });
 
     if (error) {
         setError(error.message);
