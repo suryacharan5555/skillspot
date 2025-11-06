@@ -107,7 +107,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
-        setUser(null);
+        // The onAuthStateChange listener will automatically handle setting the user to null.
+        // This avoids potential race conditions and relies on a single source of truth for auth state.
     } catch (error) {
         console.error('Error logging out:', error);
     }
