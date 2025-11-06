@@ -68,6 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
+    // Flag to prevent the auth listener from firing until the initial session is fetched.
+    let isFetchingSession = true;
+
     const fetchInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -77,23 +80,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('Error fetching initial user session:', error);
         setUser(null);
       } finally {
+        isFetchingSession = false;
         setLoading(false);
       }
     };
 
     fetchInitialSession();
-    
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: AuthChangeEvent, session: Session | null) => {
-        try {
-          await updateUserFromSession(session);
-        } catch (error) {
-          console.error('Error handling auth state change:', error);
-          setUser(null);
+        // Only run the listener logic after the initial session fetch is complete.
+        if (!isFetchingSession) {
+          try {
+            await updateUserFromSession(session);
+          } catch (error) {
+            console.error('Error handling auth state change:', error);
+            setUser(null);
+          }
         }
       }
     );
-    
+
     return () => {
       subscription.unsubscribe();
     };
