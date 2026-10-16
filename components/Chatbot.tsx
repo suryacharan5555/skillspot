@@ -61,7 +61,14 @@ export const Chatbot: React.FC = () => {
     const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
     if (key && key.trim() !== '' && key !== 'undefined') {
       try {
-        aiClientRef.current = new GoogleGenAI({ apiKey: key });
+        aiClientRef.current = new GoogleGenAI({
+          apiKey: key,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build',
+            },
+          },
+        });
         setActiveMode('gemini');
       } catch (err) {
         console.warn('Gemini initialization fallback to local smart engine', err);
@@ -125,28 +132,56 @@ export const Chatbot: React.FC = () => {
     if (aiClientRef.current) {
       try {
         const dynamicContext = buildDynamicPromptContext(ngos, jobs);
-        
-        // Build recent conversation history for Gemini
-        const history = messages.slice(-4).map((m) => ({
-          role: m.sender === 'user' ? 'user' : 'model',
-          parts: [{ text: m.text }],
-        }));
-        history.push({
-          role: 'user',
-          parts: [{ text: query }],
-        });
 
-        const result = await aiClientRef.current.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: history,
-          config: {
-            systemInstruction: dynamicContext,
-          },
-        });
+        // Build recent dialog context as plain text so the model has conversational continuity without complex REST schema pitfalls
+        const recentDialogue = messages
+          .slice(-6)
+          .map((m) => {
+            const roleLabel = m.sender === 'user' ? 'Student/User' : 'SkillSpot AI';
+            return `${roleLabel}: ${m.text}`;
+          })
+          .join('\n\n');
 
-        const responseText = result.text || '';
+        const fullPrompt = `${dynamicContext}
+
+---
+RECENT CONVERSATION HISTORY:
+${recentDialogue || '(This is the beginning of the conversation)'}
+
+CURRENT USER QUESTION:
+${query}
+
+INSTRUCTIONS FOR YOUR ANSWER:
+1. Provide a direct, factually accurate, structured, and helpful response based strictly on the live SkillSpot database above.
+2. If the user asks about courses, partner NGOs, admission criteria, open seats, trainers, or certifications, cite the exact names and details from the database.
+3. Emphasize that all programs are 100% tuition-free / grant-sponsored.
+4. Format with clean markdown headers and bullet points.`;
+
+        let responseText = '';
+        const candidateModels = [
+          'gemini-2.5-flash',
+          'gemini-3.8-flash',
+          'gemini-flash-latest',
+          'gemini-2.5-flash-lite',
+        ];
+
+        for (const modelName of candidateModels) {
+          try {
+            const result = await aiClientRef.current.models.generateContent({
+              model: modelName,
+              contents: fullPrompt,
+            });
+            if (result && result.text && result.text.trim().length > 0) {
+              responseText = result.text.trim();
+              break;
+            }
+          } catch (modelErr: any) {
+            console.warn(`Model ${modelName} call failed, trying next candidate:`, modelErr);
+          }
+        }
+
         if (responseText) {
-          // Extract any local matched action cards for rich rendering
+          // Extract local matched action cards and suggestions for rich interactive rendering
           const localSupplement = processLocalQuery(query, ngos, jobs);
 
           setMessages((prev) => [

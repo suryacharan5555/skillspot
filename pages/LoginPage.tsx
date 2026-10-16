@@ -336,8 +336,8 @@ const LoginPage: React.FC = () => {
       const isInIframe = window.self !== window.top;
 
       if (isInIframe) {
-        // Inside an iframe (e.g. AI Studio preview), Google OAuth page blocks iframe embedding with X-Frame-Options: DENY.
-        // Request the OAuth URL directly with skipBrowserRedirect: true and open it in a secure pop-up window.
+        // AI Studio or sandboxed iframe preview: Google OAuth refuses to render inside an iframe (X-Frame-Options: DENY).
+        // Try popup authentication flow first
         const { data, error: gError } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
@@ -352,15 +352,16 @@ const LoginPage: React.FC = () => {
           const popup = window.open(
             data.url,
             'skillspot_google_auth',
-            'width=520,height=650,status=no,toolbar=no,menubar=no'
+            'width=520,height=650,status=no,toolbar=no,menubar=no,location=yes'
           );
           if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+            // Popup was blocked by browser
             setError(
-              'Pop-up window was blocked by your browser. Please allow pop-ups for this site or open the app in a new tab to complete Google Sign In.'
+              'Pop-up window was blocked by your browser. Please click the pop-up icon in your URL bar to allow it, or open SkillSpot in a new tab.'
             );
           } else {
             setSuccessMessage(
-              'Google authorization opened in a separate window. Complete sign-in there and return to this tab.'
+              'Google authorization opened in a separate window. Complete sign-in there and return to this page.'
             );
           }
         }
@@ -379,13 +380,13 @@ const LoginPage: React.FC = () => {
       const msg = err?.message || '';
       if (
         msg.toLowerCase().includes('provider') &&
-        (msg.toLowerCase().includes('not enabled') || msg.toLowerCase().includes('unsupported'))
+        (msg.toLowerCase().includes('not enabled') || msg.toLowerCase().includes('unsupported') || msg.toLowerCase().includes('disabled'))
       ) {
         setError(
-          'Google Provider is not toggled ON yet in your Supabase project (keugczzhzfuomikwrldi). Go to Supabase Dashboard -> Authentication -> Providers -> Google to enable it. You can immediately use the Instant Student Demo below.'
+          'Google Provider is not yet enabled in your Supabase Dashboard. Steps to enable: Go to your Supabase Project (keugczzhzfuomikwrldi) → Authentication → Providers → Google → Toggle ON and paste your Google Cloud Client ID & Client Secret. In the meantime, you can use the instant "Launch Demo Student" button below.'
         );
       } else {
-        setError(err?.message || 'Google sign in failed. You can also use the Instant Student Demo button below.');
+        setError(err?.message || 'Google sign-in could not be completed. You can also use the Instant Student Demo button below.');
       }
     } finally {
       setIsLoading(false);

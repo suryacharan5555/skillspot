@@ -55,7 +55,7 @@ const VerifyCertificatePage: React.FC = () => {
 
   // Sample certificates for quick demonstration
   const sampleCerts = useMemo(() => {
-    return enrollments
+    return (enrollments || [])
       .filter((e) => e.status === 'Completed' && e.certificateId)
       .slice(0, 3);
   }, [enrollments]);

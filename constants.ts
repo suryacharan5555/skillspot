@@ -521,7 +521,7 @@ export const INITIAL_ENROLLMENTS: Enrollment[] = [
     previousExperience: 'Freelance copywriting and marketing.',
     reasonForJoining: 'Understand UX wireframing and user research to design better apps.'
   },
-  // Carlos: Approved in Solar
+  // Carlos: Completed in Solar PV Installation
   {
     enrollmentId: 'enr-107',
     studentId: 'stu-3',
@@ -529,10 +529,29 @@ export const INITIAL_ENROLLMENTS: Enrollment[] = [
     courseId: 'course-3-1',
     courseName: 'Solar PV Systems Installation & Electrical Safety',
     ngoId: 'ngo-3',
-    status: 'Approved',
+    status: 'Completed',
     requestDate: '2025-08-15T12:00:00Z',
     previousExperience: 'Apprentice electrician helper.',
-    reasonForJoining: 'Specialize in renewable energy and solar installations.'
+    reasonForJoining: 'Specialize in renewable energy and solar installations.',
+    completedDate: '2025-09-01T15:30:00Z',
+    certificateId: 'CERT-SKILLSPOT-2025-7140',
+    gradeScore: 'NABCEP Associate Ready (94%)'
+  },
+  // Samantha: Completed in Data Analytics
+  {
+    enrollmentId: 'enr-108',
+    studentId: 'stu-4',
+    studentName: 'Samantha Reed',
+    courseId: 'course-4-1',
+    courseName: 'Data Analytics & Business Intelligence with Python & SQL',
+    ngoId: 'ngo-4',
+    status: 'Completed',
+    requestDate: '2025-07-10T09:00:00Z',
+    previousExperience: 'Freelance copywriting and marketing.',
+    reasonForJoining: 'Transitioning to quantitative business intelligence and SQL analytics.',
+    completedDate: '2025-08-25T11:00:00Z',
+    certificateId: 'CERT-SKILLSPOT-2025-9204',
+    gradeScore: 'Honors with Distinction (96%)'
   }
 ];
 
@@ -867,6 +886,65 @@ export const INITIAL_MOCK_INTERVIEW_QUESTIONS: MockInterviewQuestion[] = [
       'Inspect database slow query logs and active connection pool utilization'
     ],
     sampleModelAnswer: 'First, I examine the telemetry metrics across three key signals: V8 event loop lag, process RSS memory versus heap used, and database connection pool saturation. If memory climbs monotonically without garbage collection recovering it, I trigger an on-demand heap snapshot via inspector or clinic.js to identify retained closures or uncleaned event listeners. If heap is healthy but event loop lag is spiking, I inspect slow query logs with EXPLAIN ANALYZE to detect unindexed sequential table scans locking worker threads. Concurrently, I verify connection pool queue times—if requests are waiting 3+ seconds to acquire a connection, I check for unclosed connections in error branches or expand pool capacity while preventing cascading failures with circuit breakers.'
+  },
+  {
+    id: 'mock-5',
+    tradeCategory: 'Healthcare & Clinical Nursing Support',
+    scenarioTitle: 'Post-Operative Acute Hypotension & Patient Fall Risk',
+    difficulty: 'Journeyman',
+    question: 'A 68-year-old post-op hip replacement patient presses the call bell complaining of sudden dizziness and cold clammy skin when attempting to stand unassisted. Describe your immediate triage sequence, vital sign verification, communication with the charge nurse, and fall prevention documentation under HIPAA.',
+    context: 'Clinical nursing assistant / practical nurse interview. Evaluates clinical instinct, orthostatic hypotension response, and patient safety protocols.',
+    keySafetyPoints: [
+      'Gently ease patient back to safe supine/semi-Fowler position without pulling on operative hip',
+      'Immediate vital signs assessment (manual BP, pulse, pulse oximetry, skin turgor)',
+      'Activate emergency call button for charge nurse assistance without leaving bedside',
+      'Document objective vitals, time of incident, and incident remediation in EHR'
+    ],
+    sampleModelAnswer: 'My immediate priority is patient safety and preventing a catastrophic fall. I immediately ease the patient back into bed into a semi-Fowler position with knees slightly flexed to avoid hip dislocation. I hit the emergency call light for the charge nurse while staying at the bedside. I take a manual blood pressure and radial pulse, checking for orthostatic hypotension, along with pulse oximetry to rule out hypoxia. I reassure the patient calmly and elevate the bed rails according to policy. When the RN arrives, I deliver a concise SBAR (Situation, Background, Assessment, Recommendation) handover with exact vitals. Once stabilized, I document the event objectively in the EHR, initiate heightened fall-risk precautions, and re-check vitals every 15 minutes.'
+  },
+  {
+    id: 'mock-6',
+    tradeCategory: 'HVAC/R & Climate Control Systems',
+    scenarioTitle: 'Heat Pump Refrigerant Circuit Subcooling & TXV Restriction',
+    difficulty: 'Journeyman',
+    question: 'A commercial multi-split heat pump unit in cooling mode displays low suction pressure, normal-to-high head pressure, and high subcooling (18°F above manufacturer spec) with very high superheat. Walk through your manifold gauge analysis, EPA 608 recovery compliance, and step-by-step diagnosis of a restricted Thermal Expansion Valve (TXV).',
+    context: 'HVAC service technician interview. Evaluates thermodynamic cycle understanding, gauge interpretation, and EPA refrigerant handling.',
+    keySafetyPoints: [
+      'Digital manifold gauge calibration and EPA 608 certified recovery equipment',
+      'Verify airflow across evaporator coil and clean filter before refrigerant diagnosis',
+      'Insulate sensing bulb and check bulb charge before condemning TXV power head'
+    ],
+    sampleModelAnswer: 'High subcooling combined with high superheat and low suction pressure is the classic textbook signature of a liquid line restriction rather than a low refrigerant charge. Because subcooling is elevated, the condenser is stacking liquid refrigerant that cannot pass through the metering device. First, I verify that the evaporator air filter and blower wheel are clean to eliminate airflow starvation. Next, I inspect the liquid line filter drier for a temperature drop across the inlet and outlet using a calibrated dual-clamp digital thermometer; an unprompted temperature drop greater than 2°F indicates a clogged drier. If the drier is clear, the restriction is at the TXV screen or power head. I inspect the TXV sensing bulb to ensure it is tightly clamped at the 10 or 2 o clock position on a clean horizontal suction line and insulated. If the bulb has lost charge, I recover the refrigerant into a certified EPA 608 recovery cylinder, pull a deep vacuum to under 500 microns, replace the TXV and filter drier, weigh in the virgin charge to factory nameplate specs, and verify subcooling within 10-12°F.'
+  },
+  {
+    id: 'mock-7',
+    tradeCategory: 'Automotive Technology & EV Powertrains',
+    scenarioTitle: 'High-Voltage Traction Battery Manual Service Disconnect (MSD)',
+    difficulty: 'Master Tech',
+    question: 'A customer brings in a battery electric vehicle (BEV) following a minor undercarriage impact with an illuminated high-voltage isolation fault on the dash. What is the mandatory step-by-step de-energization procedure, 1000V PPE protocol, and proof of zero electrical potential before you drop the battery pack for inspection?',
+    context: 'Electric vehicle master technician interview. Evaluates NFPA 70E / SAE J2344 EV safety protocols and high-voltage isolation.',
+    keySafetyPoints: [
+      'Class 0 1000V rated insulated electrical safety gloves with outer leather work protectors',
+      'Removal and physical padlock containment of the Manual Service Disconnect (MSD) plug',
+      'Allow minimum 10-minute capacitor bleed-off period for inverter DC link',
+      'Live-Dead-Live probe verification at high-voltage test ports under 12V threshold'
+    ],
+    sampleModelAnswer: 'High-voltage electric vehicle packs carry 400V to 800V DC which is lethal. Before touching the vehicle, I cordon off a 3-meter safety perimeter with high-voltage warning cones. I inspect my Class 0 1000V gloves with an air-leak test and don full arc-rated eye and face protection. I turn off the ignition, remove the key fob 15 meters away, and disconnect the 12V auxiliary battery negative terminal to disable high-voltage contactor closing logic. Then I access and remove the Manual Service Disconnect (MSD) plug and lock it inside a designated LOTO lockout box in my possession. I wait a mandatory 10 minutes for the inverter capacitor discharge circuit to bleed off residual DC link energy. Using a CAT IV 1000V meter verified against a known test bench, I test between high-voltage positive and chassis ground, negative and chassis ground, and positive to negative—confirming voltage is strictly 0V (under 12V standard). Only then is the pack safe for mechanical hoist unbolting.'
+  },
+  {
+    id: 'mock-8',
+    tradeCategory: 'Trade Leadership & Job Site Management',
+    scenarioTitle: 'General Contractor Schedule Acceleration & Safety Dispute',
+    difficulty: 'Journeyman',
+    question: 'On a commercial high-rise site, the general contractor demands your electrical crew pull feeders through a wet underground conduit corridor while overhead drywallers are working without catch nets, threatening penalty back-charges if you delay the milestone. How do you handle this site conflict, protect your apprentice crew, and document OSHA Stop-Work Authority while keeping client relations constructive?',
+    context: 'Journeyman foreman / project lead interview. Evaluates OSHA Stop-Work Authority, legal compliance, de-escalation, and written change documentation.',
+    keySafetyPoints: [
+      'Exercise immediate OSHA Stop-Work Authority regarding active overhead drop hazards',
+      'De-escalate verbally by focusing on shared liability and risk prevention rather than blame',
+      'Propose alternative sequenced work areas so progress continues without safety violations',
+      'Issue formal written Notice of Delay / Site Hazard condition to general contractor superintendent'
+    ],
+    sampleModelAnswer: 'Under OSHA Section 5(a)(1) General Duty Clause and company policy, as foreman I have a non-negotiable legal and moral obligation to exercise Stop-Work Authority whenever an imminent hazard exists. Having my apprentices work directly under overhead drywallers without toe-boards, catch nets, or hardhat drop zones is an unacceptable struck-by hazard, compounded by standing water near electrical pulls. I speak directly with the GC superintendent away from the crew. I de-escalate by saying: "We both want this phase delivered on schedule and without an OSHA shutdown or worker injury that halts the entire job. Let us protect both our companies." I propose an immediate productive solution: I redirect my crew to dress the distribution panels in the dry electrical vault for the next four hours while the drywall crew finishes and nets the corridor. Concurrently, I send a polite, factual written email and daily site log detailing the hazard condition, the temporary reassignment, and the exact revised timeline to prevent frivolous liquidated damages.'
   }
 ];
 

@@ -252,7 +252,7 @@ const AdminDashboard: React.FC = () => {
 
       if (newStatus === 'Completed') {
         const certSuffix = Math.floor(1000 + Math.random() * 9000);
-        updatePayload.certificateId = `CERT-${adminNgo?.id.substring(0, 4).toUpperCase() || 'SKILL'}-2026-${certSuffix}`;
+        updatePayload.certificateId = `CERT-${(adminNgo?.id || 'SKILL').substring(0, 4).toUpperCase()}-2026-${certSuffix}`;
         updatePayload.completedDate = new Date().toISOString();
         updatePayload.gradeScore = customGradeScore || 'Certified with Honors (Grade A)';
         notificationMsg = `🎉 Congratulations! You have successfully completed "${enrollment.courseName}". Your official verified certificate is now available in your Student Dashboard!`;
@@ -386,14 +386,18 @@ const AdminDashboard: React.FC = () => {
     if (!adminNgo) return;
 
     try {
+      setNgos((prev) => prev.filter((n) => n.id !== adminNgo.id));
+      setEnrollments((prev) => prev.filter((e) => e.ngoId !== adminNgo.id));
       await supabase.from('enrollments').delete().eq('ngoId', adminNgo.id);
       await supabase.from('users').delete().eq('ngoId', adminNgo.id);
       await supabase.from('ngos').delete().eq('id', adminNgo.id);
-      alert(`${adminNgo?.name || 'Organization'} has been removed.`);
+      setIsDeleteNgoModalOpen(false);
       await logout();
       navigate('/');
     } catch (err: any) {
       console.error('Failed to delete NGO:', err);
+      setIsDeleteNgoModalOpen(false);
+      navigate('/');
     }
   };
 
@@ -663,7 +667,7 @@ const AdminDashboard: React.FC = () => {
                         {enrollment.studentName}
                       </div>
                       <span className="text-[10px] text-gray-400 font-mono">
-                        ID: {enrollment.enrollmentId.substring(0, 10)}...
+                        ID: {(enrollment.enrollmentId || enrollment.id || 'ENR-00000').substring(0, 10)}...
                       </span>
                     </td>
 

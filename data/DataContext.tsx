@@ -38,7 +38,7 @@ import {
 import { subscribeToRealtimeNotifications } from '../services/realtimeNotificationService';
 
 const STORAGE_KEYS = {
-  NGOS: 'skillspot_ngos_v2',
+  NGOS: 'skillspot_ngos_v3',
   USERS: 'skillspot_users_v2',
   ENROLLMENTS: 'skillspot_enrollments_v2',
   NOTIFICATIONS: 'skillspot_notifications_v2',
@@ -107,8 +107,21 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [ngos, setNgos] = useState<NGO[]>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEYS.NGOS);
-      return saved ? JSON.parse(saved) : initialNgos;
+      const saved = localStorage.getItem(STORAGE_KEYS.NGOS) || localStorage.getItem('skillspot_ngos_v2');
+      if (saved) {
+        const parsed: NGO[] = JSON.parse(saved);
+        // Exclude unwanted/extraneous added NGOs (ngo-5 to ngo-13)
+        const removedIds = new Set(['ngo-5', 'ngo-6', 'ngo-7', 'ngo-8', 'ngo-9', 'ngo-10', 'ngo-11', 'ngo-12', 'ngo-13']);
+        const cleaned = parsed.filter((n) => !removedIds.has(n.id));
+        
+        // Ensure canonical initial NGOs are present
+        const existingIds = new Set(cleaned.map((n) => n.id));
+        const missingInitial = initialNgos.filter((n) => !existingIds.has(n.id));
+        const merged = [...cleaned, ...missingInitial];
+        localStorage.setItem(STORAGE_KEYS.NGOS, JSON.stringify(merged));
+        return merged;
+      }
+      return initialNgos;
     } catch {
       return initialNgos;
     }

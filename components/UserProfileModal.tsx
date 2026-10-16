@@ -177,7 +177,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    name.slice(0, 2).toUpperCase() || 'SS'
+                    (name || user.name || 'SS').slice(0, 2).toUpperCase()
                   )}
                 </div>
                 <div className="pb-1">

@@ -48,8 +48,8 @@ const NgoCard: React.FC<NgoCardProps> = ({ ngo }) => {
   };
 
   const theme = getGradientTheme(ngo.type);
-  const coursesCount = ngo.courses?.length || 0;
-  const topCourses = ngo.courses?.slice(0, 2) || [];
+  const coursesCount = (ngo.courses || []).length;
+  const topCourses = (ngo.courses || []).slice(0, 2);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-2xl border border-gray-100 dark:border-gray-700/80 overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1.5">
@@ -112,7 +112,7 @@ const NgoCard: React.FC<NgoCardProps> = ({ ngo }) => {
           <span className={`inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-lg border ${theme.badge}`}>
             {ngo.type}
           </span>
-          {ngo.primaryCategories?.slice(0, 2).map((cat) => (
+          {(ngo.primaryCategories || []).slice(0, 2).map((cat) => (
             <span
               key={cat}
               className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 truncate max-w-[150px]"

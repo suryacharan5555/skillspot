@@ -231,7 +231,7 @@ export const OrganizationProfileModal: React.FC<OrganizationProfileModalProps> =
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-850 px-6 pt-3 space-x-2 shrink-0 overflow-x-auto text-xs font-bold">
+        <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800 px-6 pt-3 space-x-2 shrink-0 overflow-x-auto text-xs font-bold">
           <button
             type="button"
             onClick={() => setActiveTab('details')}
@@ -852,7 +852,7 @@ export const OrganizationProfileModal: React.FC<OrganizationProfileModalProps> =
                       {logoUrl ? (
                         <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                       ) : (
-                        name.slice(0, 2).toUpperCase()
+                        (name || 'SS').slice(0, 2).toUpperCase()
                       )}
                     </div>
                     <div className="pb-1">

@@ -11,12 +11,34 @@
     <meta name="theme-color" content="#1e1b4b" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/vite.svg" />
+    <script>
+      // Immediately apply saved theme to prevent flash of wrong theme
+      try {
+        var rawTheme = localStorage.getItem('skillspot_theme');
+        var theme = 'light';
+        if (rawTheme) {
+          try {
+            theme = JSON.parse(rawTheme);
+          } catch (_) {
+            theme = rawTheme;
+          }
+        }
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          document.documentElement.style.colorScheme = 'light';
+        }
+      } catch (e) {}
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Configure Tailwind CSS to use the 'class' strategy for dark mode
       tailwind.config = {
         darkMode: 'class',
-      }
+      };
       // Register service worker for offline viewing of credentials
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -26,22 +48,10 @@
         });
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.4",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
-    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.45.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body class="bg-gray-50 dark:bg-gray-900">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="/index.css">
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

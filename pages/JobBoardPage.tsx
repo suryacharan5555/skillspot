@@ -58,6 +58,8 @@ const JobBoardPage: React.FC = () => {
   const [attachedCertId, setAttachedCertId] = useState<string>('');
   const [coverNote, setCoverNote] = useState('');
   const [includePortfolio, setIncludePortfolio] = useState(true);
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
 
   // Post Job Form State
   const [newJobTitle, setNewJobTitle] = useState('');
@@ -99,17 +101,21 @@ const JobBoardPage: React.FC = () => {
 
   const handleApplySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedJobForApply || !user) return;
+    if (!selectedJobForApply) return;
+
+    const applicantName = user?.name || guestName.trim() || 'Vocational Applicant';
+    const applicantEmail = user?.email || guestEmail.trim() || 'applicant@skillspot.org';
+    const applicantId = user?.id || `guest-${Date.now()}`;
 
     const newApp: JobApplication = {
       id: `app-${Date.now()}`,
       jobId: selectedJobForApply.id,
       jobTitle: selectedJobForApply.title,
-      studentId: user.id,
-      studentName: user.name,
-      studentEmail: user.email,
+      studentId: applicantId,
+      studentName: applicantName,
+      studentEmail: applicantEmail,
       attachedCertificateId: attachedCertId || undefined,
-      portfolioLinks: includePortfolio ? studentProjects.map((p) => p.title) : [],
+      portfolioLinks: includePortfolio && studentProjects.length > 0 ? studentProjects.map((p) => p.title) : [],
       coverNote,
       appliedDate: new Date().toISOString(),
     };
@@ -118,21 +124,23 @@ const JobBoardPage: React.FC = () => {
 
     // Increment applicant count on job
     setJobs((prev) =>
-      prev.map((j) => (j.id === selectedJobForApply.id ? { ...j, applicantsCount: j.applicantsCount + 1 } : j))
+      prev.map((j) => (j.id === selectedJobForApply.id ? { ...j, applicantsCount: (j.applicantsCount || 0) + 1 } : j))
     );
 
-    // Trigger in-app notification
-    setNotifications((prev) => [
-      {
-        id: `notif-${Date.now()}`,
-        userId: user.id,
-        message: `Your application for "${selectedJobForApply.title}" at ${selectedJobForApply.company} was submitted successfully!`,
-        link: '/jobs',
-        isRead: false,
-        createdAt: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
+    // Trigger in-app notification if user is logged in
+    if (user) {
+      setNotifications((prev) => [
+        {
+          id: `notif-${Date.now()}`,
+          userId: user.id,
+          message: `Your application for "${selectedJobForApply.title}" at ${selectedJobForApply.company} was submitted successfully!`,
+          link: '/jobs',
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+    }
 
     setApplySuccessMessage(`Application sent to ${selectedJobForApply.company}!`);
     setTimeout(() => {
@@ -343,7 +351,7 @@ const JobBoardPage: React.FC = () => {
                   Key Qualifications
                 </span>
                 <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-300">
-                  {job.requirements.slice(0, 3).map((req, idx) => (
+                  {(job.requirements || []).slice(0, 3).map((req, idx) => (
                     <li key={idx} className="flex items-center space-x-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                       <span className="line-clamp-1">{req}</span>
@@ -425,17 +433,48 @@ const JobBoardPage: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleApplySubmit} className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                    Applicant Name & Contact
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    value={user ? `${user.name} (${user.email})` : 'Guest / Sign in to auto-attach'}
-                    className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 font-semibold"
-                  />
-                </div>
+                {user ? (
+                  <div>
+                    <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                      Applicant Name & Contact (Auto-attached)
+                    </label>
+                    <input
+                      type="text"
+                      disabled
+                      value={`${user.name} (${user.email})`}
+                      className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 font-semibold"
+                    />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Your Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Alex Morgan"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        Your Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="alex@example.com"
+                        value={guestEmail}
+                        onChange={(e) => setGuestEmail(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Attach Verified Certificate */}
                 <div>

@@ -18,7 +18,6 @@ import RealtimeNotificationToasts from './components/RealtimeNotificationToasts'
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { ThemeProvider } from './theme/ThemeContext';
 import { DataProvider } from './data/DataContext';
-import { LanguageProvider } from './i18n/LanguageContext';
 
 const PrivateRoute: React.FC<{ children: ReactElement; role: 'admin' | 'student' }> = ({
   children,
@@ -80,13 +79,11 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <LanguageProvider>
-          <DataProvider>
-            <HashRouter>
-              <AppContent />
-            </HashRouter>
-          </DataProvider>
-        </LanguageProvider>
+        <DataProvider>
+          <HashRouter>
+            <AppContent />
+          </HashRouter>
+        </DataProvider>
       </ThemeProvider>
     </AuthProvider>
   );

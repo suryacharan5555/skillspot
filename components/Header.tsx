@@ -3,8 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 import { useData } from '../data/DataContext';
-import { useLanguage } from '../i18n/LanguageContext';
-import { SupportedLanguage } from '../types';
 import {
   Compass,
   Building2,
@@ -20,7 +18,6 @@ import {
   User as UserIcon,
   Sparkles,
   PlusCircle,
-  Globe,
   Menu,
   X,
   Mic,
@@ -42,7 +39,6 @@ export const Header: React.FC = () => {
   const { user, logout, isAuthenticated, updateUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { notifications, setNotifications } = useData();
-  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -51,7 +47,6 @@ export const Header: React.FC = () => {
   const [isSoundMuted, setIsSoundMuted] = useState(() => {
     return localStorage.getItem('skillspot_sound_enabled') === 'false';
   });
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNgoModalOpen, setIsNgoModalOpen] = useState(false);
   const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
@@ -118,14 +113,6 @@ export const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const languagesList: { code: SupportedLanguage; label: string; flag: string }[] = [
-    { code: 'en', label: 'English', flag: '🇺🇸' },
-    { code: 'hi', label: 'हिन्दी (Hindi)', flag: '🇮🇳' },
-    { code: 'es', label: 'Español (Spanish)', flag: '🇪🇸' },
-    { code: 'fr', label: 'Français (French)', flag: '🇫🇷' },
-    { code: 'te', label: 'తెలుగు (Telugu)', flag: '🇮🇳' },
-  ];
-
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800 transition-colors duration-300">
@@ -168,7 +155,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <Building2 className="w-4 h-4" />
-                <span>{t('navNgoCenters')}</span>
+                <span>NGO Centers</span>
               </Link>
 
               <Link
@@ -180,7 +167,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <Briefcase className="w-4 h-4 text-emerald-500" />
-                <span>{t('navJobBoard')}</span>
+                <span>Job & Tool Grants</span>
               </Link>
 
               <Link
@@ -192,7 +179,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <Mic className="w-4 h-4 text-blue-500" />
-                <span>{t('navCoach')}</span>
+                <span>AI Trade Coach</span>
               </Link>
 
               <Link
@@ -204,7 +191,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <Building2 className="w-4 h-4 text-indigo-500" />
-                <span>{t('navEmployers')}</span>
+                <span>Employer Portal</span>
               </Link>
 
               <Link
@@ -216,7 +203,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <MapPin className="w-4 h-4 text-teal-500" />
-                <span>{t('navWorkshops')}</span>
+                <span>Workshop Map</span>
               </Link>
 
               <Link
@@ -228,7 +215,7 @@ export const Header: React.FC = () => {
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-indigo-500" />
-                <span>{t('navVerify')}</span>
+                <span>Verify Certificate</span>
               </Link>
 
               {user?.role === 'student' && (
@@ -241,7 +228,7 @@ export const Header: React.FC = () => {
                   }`}
                 >
                   <GraduationCap className="w-4 h-4 text-amber-500" />
-                  <span>{t('navStudentHub')}</span>
+                  <span>Student Hub</span>
                 </Link>
               )}
 
@@ -255,54 +242,13 @@ export const Header: React.FC = () => {
                   }`}
                 >
                   <BarChart3 className="w-4 h-4 text-purple-500" />
-                  <span>{t('navAdminStudio')}</span>
+                  <span>Admin Studio</span>
                 </Link>
               )}
             </nav>
 
             {/* Right Action Controls */}
             <div className="flex items-center space-x-2">
-              
-              {/* Multi-Language Selector Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsLanguageOpen((prev) => !prev)}
-                  className="px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 text-xs font-bold flex items-center space-x-1.5 transition-colors"
-                  title="Change Language"
-                >
-                  <Globe className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="uppercase text-[11px] font-mono">{language}</span>
-                </button>
-
-                {isLanguageOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50 animate-in fade-in duration-100">
-                    <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 border-b dark:border-gray-700">
-                      Select Language
-                    </div>
-                    {languagesList.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          setLanguage(lang.code);
-                          setIsLanguageOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors ${
-                          language === lang.code
-                            ? 'font-bold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-gray-700/50'
-                            : 'text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        <span className="flex items-center space-x-2">
-                          <span>{lang.flag}</span>
-                          <span>{lang.label}</span>
-                        </span>
-                        {language === lang.code && <span className="text-blue-500 text-xs">✓</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Quick Register NGO Button */}
               {(!isAuthenticated || user?.role !== 'admin') && (
                 <button
@@ -310,7 +256,7 @@ export const Header: React.FC = () => {
                   className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-xs transition-all duration-200"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
-                  <span>{t('navRegisterNgo')}</span>
+                  <span>Register NGO</span>
                 </button>
               )}
 
@@ -342,7 +288,7 @@ export const Header: React.FC = () => {
                   </button>
 
                   {isNotificationsOpen && (
-                    <div className="absolute right-0 mt-2 w-84 sm:w-96 bg-white dark:bg-gray-850 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-in fade-in duration-150">
+                    <div className="absolute right-0 mt-2 w-84 sm:w-96 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden z-50 animate-in fade-in duration-150">
                       {/* Notification Header */}
                       <div className="p-3.5 bg-gradient-to-r from-blue-50/90 to-indigo-50/90 dark:from-gray-800 dark:to-gray-800/95 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -570,7 +516,7 @@ export const Header: React.FC = () => {
                   to="/login"
                   className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-xs hover:shadow transition-all"
                 >
-                  {t('navSignIn')}
+                  Sign In / Register
                 </Link>
               )}
 
@@ -594,7 +540,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Building2 className="w-4 h-4 text-blue-500" />
-              <span>{t('navNgoCenters')}</span>
+              <span>NGO Centers</span>
             </Link>
             <Link
               to="/jobs"
@@ -602,7 +548,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Briefcase className="w-4 h-4 text-emerald-500" />
-              <span>{t('navJobBoard')}</span>
+              <span>Job & Tool Grants</span>
             </Link>
             <Link
               to="/coach"
@@ -610,7 +556,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Mic className="w-4 h-4 text-blue-500" />
-              <span>{t('navCoach')}</span>
+              <span>AI Trade Coach</span>
             </Link>
             <Link
               to="/employers"
@@ -618,7 +564,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <Building2 className="w-4 h-4 text-indigo-500" />
-              <span>{t('navEmployers')}</span>
+              <span>Employer Portal</span>
             </Link>
             <Link
               to="/workshops"
@@ -626,7 +572,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <MapPin className="w-4 h-4 text-teal-500" />
-              <span>{t('navWorkshops')}</span>
+              <span>Workshop Map</span>
             </Link>
             <Link
               to="/verify"
@@ -634,7 +580,7 @@ export const Header: React.FC = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <ShieldCheck className="w-4 h-4 text-indigo-500" />
-              <span>{t('navVerify')}</span>
+              <span>Verify Certificate</span>
             </Link>
             {user?.role === 'student' && (
               <Link
@@ -643,7 +589,7 @@ export const Header: React.FC = () => {
                 className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40"
               >
                 <GraduationCap className="w-4 h-4" />
-                <span>{t('navStudentHub')}</span>
+                <span>Student Hub</span>
               </Link>
             )}
             {user?.role === 'admin' && (
@@ -653,9 +599,42 @@ export const Header: React.FC = () => {
                 className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40"
               >
                 <BarChart3 className="w-4 h-4" />
-                <span>{t('navAdminStudio')}</span>
+                <span>Admin Studio</span>
               </Link>
             )}
+
+            {/* Mobile Drawer Settings Row: Theme & Sound */}
+            <div className="pt-2 mt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between px-3 py-1">
+              <button
+                onClick={toggleTheme}
+                className="flex items-center space-x-2 text-xs font-bold text-gray-700 dark:text-gray-300"
+              >
+                {theme === 'light' ? (
+                  <>
+                    <Moon className="w-4 h-4 text-slate-700" />
+                    <span>Dark Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="w-4 h-4 text-amber-400" />
+                    <span>Light Mode</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={toggleSound}
+                className="flex items-center space-x-1 text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                title={isSoundMuted ? 'Unmute Audio Chimes' : 'Mute Audio Chimes'}
+              >
+                {isSoundMuted ? (
+                  <VolumeX className="w-4 h-4 text-rose-500" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-blue-500" />
+                )}
+                <span>{isSoundMuted ? 'Muted' : 'Sound On'}</span>
+              </button>
+            </div>
           </div>
         )}
       </header>

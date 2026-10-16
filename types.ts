@@ -358,6 +358,33 @@ export interface MockInterviewEvaluation {
   modelAnswerAnalysis: string;
 }
 
+export interface CoachingChatMessage {
+  id: string;
+  sender: 'user' | 'coach';
+  text: string;
+  timestamp: string;
+  audioPrompt?: boolean;
+}
+
+export interface TrainingSession {
+  id: string;
+  userId?: string;
+  scenarioId: string;
+  scenarioTitle: string;
+  tradeCategory: string;
+  difficulty: string;
+  userAnswer: string;
+  coachPersona: 'dave' | 'sarah' | 'marcus';
+  secondsRemaining: number;
+  timerDuration: number;
+  evaluation?: MockInterviewEvaluation | null;
+  status: 'draft' | 'in_progress' | 'evaluated' | 'completed';
+  conversation: CoachingChatMessage[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface VocationalResumeData {
   fullName: string;
   targetTrade: string;

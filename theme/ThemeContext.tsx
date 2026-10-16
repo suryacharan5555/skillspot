@@ -13,14 +13,31 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useLocalStorage<Theme>('skillspot_theme', 'light');
 
-  useEffect(() => {
+  const applyTheme = (t: Theme) => {
     const root = window.document.documentElement;
+    const body = window.document.body;
     root.classList.remove('light', 'dark');
-    root.classList.add(theme);
+    root.classList.add(t);
+    if (body) {
+      body.classList.remove('light', 'dark');
+      body.classList.add(t);
+    }
+    root.style.colorScheme = t;
+    try {
+      if ((window as any).tailwind && typeof (window as any).tailwind.refresh === 'function') {
+        (window as any).tailwind.refresh();
+      }
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    applyTheme(theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    const nextTheme: Theme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
   };
 
   return (

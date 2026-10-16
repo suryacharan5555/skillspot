@@ -517,7 +517,7 @@ export function generateSkillMasteryPdfReport(
   curY += 5;
 
   // Left Column: Track Mastery table
-  trackMasteryData.slice(0, 5).forEach((track, i) => {
+  (trackMasteryData || []).slice(0, 5).forEach((track, i) => {
     doc.setFillColor(248, 250, 252);
     doc.roundedRect(14, curY, leftColW, 8.5, 1.5, 1.5, 'F');
     doc.setDrawColor(226, 232, 240);
@@ -544,7 +544,7 @@ export function generateSkillMasteryPdfReport(
   });
 
   // Right Column: Proficiency Tiers
-  let tierY = curY - (trackMasteryData.slice(0, 5).length * 10);
+  let tierY = curY - ((trackMasteryData || []).slice(0, 5).length * 10);
   proficiencyTierData.forEach((tier) => {
     doc.setFillColor(248, 250, 252);
     doc.roundedRect(rightColX, tierY, rightColW, 9.5, 1.5, 1.5, 'F');

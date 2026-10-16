@@ -305,13 +305,13 @@ export const CircularSkillProgressTracker: React.FC<CircularSkillProgressTracker
 
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 gap-3 text-xs w-full sm:w-auto">
-            <div className="p-2 rounded-xl bg-white/70 dark:bg-gray-850 border border-gray-200/50 dark:border-gray-700/50">
+            <div className="p-2 rounded-xl bg-white/70 dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50">
               <span className="text-[10px] text-gray-400 block font-semibold">Topics Mastered</span>
               <span className="font-extrabold text-gray-900 dark:text-white">
                 {totalMasteredTopics} / {totalAvailableTopics || '—'}
               </span>
             </div>
-            <div className="p-2 rounded-xl bg-white/70 dark:bg-gray-850 border border-gray-200/50 dark:border-gray-700/50">
+            <div className="p-2 rounded-xl bg-white/70 dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50">
               <span className="text-[10px] text-gray-400 block font-semibold">Submissions</span>
               <span className="font-extrabold text-blue-600 dark:text-blue-400">
                 {totalSubmissions} Submitted
@@ -328,7 +328,7 @@ export const CircularSkillProgressTracker: React.FC<CircularSkillProgressTracker
             onClick={() => setFilterMode('current')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
               filterMode === 'current'
-                ? 'bg-white dark:bg-gray-850 text-blue-600 dark:text-blue-400 shadow-xs'
+                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-xs'
                 : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
@@ -340,7 +340,7 @@ export const CircularSkillProgressTracker: React.FC<CircularSkillProgressTracker
             onClick={() => setFilterMode('all')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
               filterMode === 'all'
-                ? 'bg-white dark:bg-gray-850 text-blue-600 dark:text-blue-400 shadow-xs'
+                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-xs'
                 : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
@@ -351,7 +351,7 @@ export const CircularSkillProgressTracker: React.FC<CircularSkillProgressTracker
             onClick={() => setFilterMode('completed')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${
               filterMode === 'completed'
-                ? 'bg-white dark:bg-gray-850 text-emerald-600 dark:text-emerald-400 shadow-xs'
+                ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
                 : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >

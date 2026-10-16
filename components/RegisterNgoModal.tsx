@@ -671,7 +671,7 @@ export const RegisterNgoModal: React.FC<RegisterNgoModalProps> = ({
           userId: 'public',
           type: 'enrollment',
           title: `🎉 New Training Partner Registered!`,
-          message: `${ngoName.trim()} has joined the SkillSpot network specializing in ${selectedCategories.slice(0, 2).join(', ')}.`,
+          message: `${ngoName.trim()} has joined the SkillSpot network specializing in ${(selectedCategories || []).slice(0, 2).join(', ')}.`,
           link: `/ngo/${finalNgoId}`,
         });
       } catch (notifErr) {
@@ -1715,7 +1715,7 @@ export const RegisterNgoModal: React.FC<RegisterNgoModalProps> = ({
                         <div>
                           <h4 className="text-lg font-black">{ngoName}</h4>
                           <p className="text-xs text-white/90">
-                            {tagline || `Specializing in ${selectedCategories.slice(0, 2).join(', ')}`}
+                            {tagline || `Specializing in ${(selectedCategories || []).slice(0, 2).join(', ')}`}
                           </p>
                         </div>
                       </div>
